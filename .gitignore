@@ -15,3 +15,6 @@ migrations
 # Add SQLITE DB
 diagnostic
 diagnostic_test
+
+#not pushing vscode to repo
+.vscode

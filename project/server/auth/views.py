@@ -8,29 +8,30 @@ from project.server.models import User
 
 auth_blueprint = Blueprint('auth', __name__)
 
+
 class RegisterAPI(MethodView):
     """
     User Registration Resource
     """
-
     def get(self):
-    	responseObject = {
-    		'status': 'success',
-    		'message': 'Request successful but please send an HTTP POST request to register the user.'
-    	}
-    	return make_response(jsonify(responseObject)), 201
+        responseObject = {
+            'status':
+            'success',
+            'message':
+            'Request successful but please send an HTTP POST request to register the user.'
+        }
+        return make_response(jsonify(responseObject)), 201
 
     def post(self):
         # get the post data
-        post_data = request.get_json(); print(request)
+        post_data = request.get_json()
+        print(request)
         # check if user already exists
         user = User.query.filter_by(email=post_data.get('email')).first()
         if not user:
             try:
-                user = User(
-                    email=post_data.get('email'),
-                    password=post_data.get('password')
-                )
+                user = User(email=post_data.get('email'),
+                            password=post_data.get('password'))
 
                 # insert the user
                 db.session.add(user)
@@ -57,12 +58,35 @@ class RegisterAPI(MethodView):
             return make_response(jsonify(responseObject)), 202
 
 
+class UserListAPI(MethodView):
+    def get(self):
+        all_users = User.query.all()  #query from User
+        result = []  #return a list of emails
+
+        try:
+            for user in all_users:
+                email = user.email
+                result.append(email)
+            return make_response(jsonify(result)), 201
+
+        except Exception as e:
+            responseObject = {
+                'status': 'fail',
+                'message': 'Some error occurred. Please try again.'
+            }
+            return make_response(jsonify(responseObject)), 401
+
+
 # define the API resources
 registration_view = RegisterAPI.as_view('register_api')
+userlist_view = UserListAPI.as_view('users_api')
 
 # add Rules for API Endpoints
-auth_blueprint.add_url_rule(
-    '/auth/register',
-    view_func=registration_view,
-    methods=['POST', 'GET']
-)
+auth_blueprint.add_url_rule('/auth/register',
+                            view_func=registration_view,
+                            methods=['POST', 'GET'])
+#add route "users/index"
+
+auth_blueprint.add_url_rule('/users/index',
+                            view_func=userlist_view,
+                            methods=['GET'])
